@@ -3,6 +3,10 @@ import { InputHandler } from "./InputHandler";
 import { Renderer } from "./Renderer";
 
 export class Engine {
+  private lastTime = 0;
+  private accumulator = 0;
+  private readonly tickRate = 1000 / 60; // 60 FPS
+
   private renderer: Renderer;
   private player: Player;
   private input: InputHandler;
@@ -16,18 +20,27 @@ export class Engine {
 
   start() {
     this.running = true;
-    this.loop();
+    requestAnimationFrame(this.loop);
   }
 
   stop() {
     this.running = false;
   }
 
-  private loop = () => {
+  private loop = (currentTime: number) => {
     if (!this.running) return;
 
-    this.update();
-    this.render(); // Stay at front-end
+    if (!this.lastTime) this.lastTime = currentTime;
+    const delta = currentTime - this.lastTime;
+    this.lastTime = currentTime;
+    this.accumulator += delta;
+
+    while (this.accumulator >= this.tickRate) {
+      this.update();
+      this.accumulator -= this.tickRate;
+    }
+
+    this.render();
 
     requestAnimationFrame(this.loop);
   };
