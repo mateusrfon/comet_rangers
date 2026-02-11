@@ -13,6 +13,7 @@ export class Renderer {
   }
 
   clear() {
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset any transformations
     this.ctx.clearRect(0, 0, this.width, this.height);
   }
 
@@ -22,12 +23,19 @@ export class Renderer {
     this.ctx.fill();
   }
 
-  drawShip(x: number, y: number, size: number) {
+  drawShip(x: number, y: number, angle: number, size: number) {
+    this.ctx.save();
+
+    this.ctx.translate(x, y);
+    this.ctx.rotate(angle);
+
     this.ctx.beginPath();
-    this.ctx.moveTo(x, y - size);
-    this.ctx.lineTo(x - size, y + size);
-    this.ctx.lineTo(x + size, y + size);
+    this.ctx.moveTo(size, 0); // Tip of the ship
+    this.ctx.lineTo(-size, size / 1.5); // Rear right
+    this.ctx.lineTo(-size, -size / 1.5); // Rear left
     this.ctx.closePath();
     this.ctx.fill();
+
+    this.ctx.restore();
   }
 }

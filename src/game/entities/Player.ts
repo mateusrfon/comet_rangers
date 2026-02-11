@@ -3,20 +3,39 @@ import type { InputState } from "../InputHandler";
 export class Player {
   x: number;
   y: number;
-  speed: number;
-  size: number;
 
-  constructor(x: number, y: number, speed = 1, size = 20) {
+  size = 20;
+
+  angle = 0;
+  rotationSpeed = 0.05;
+
+  velocityX = 0;
+  velocityY = 0;
+
+  acceleration = 0.2;
+  friction = 0.99;
+
+  constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
-    this.speed = speed;
-    this.size = size;
   }
 
   update(input: InputState) {
-    if (input.up) this.y -= this.speed;
-    if (input.down) this.y += this.speed;
-    if (input.left) this.x -= this.speed;
-    if (input.right) this.x += this.speed;
+    // Rotation
+    if (input.left) this.angle -= this.rotationSpeed;
+    if (input.right) this.angle += this.rotationSpeed;
+
+    if (input.up) {
+      this.velocityX += Math.cos(this.angle) * this.acceleration;
+      this.velocityY += Math.sin(this.angle) * this.acceleration;
+    }
+
+    // Apply friction
+    this.velocityX *= this.friction;
+    this.velocityY *= this.friction;
+
+    // Update position based on velocity
+    this.x += this.velocityX;
+    this.y += this.velocityY;
   }
 }

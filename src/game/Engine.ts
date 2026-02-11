@@ -36,10 +36,14 @@ export class Engine {
     this.player.update(this.input.getState());
   }
 
-  // Stay at front-end
   private render() {
     this.renderer.clear();
     // this.renderer.drawCircle(this.player.x, this.player.y, this.player.size);
-    this.renderer.drawShip(this.player.x, this.player.y, this.player.size);
+    this.renderer.drawShip(
+      this.player.x,
+      this.player.y,
+      this.player.angle,
+      this.player.size,
+    );
   }
 }
