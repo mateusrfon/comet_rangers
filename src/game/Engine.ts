@@ -47,16 +47,59 @@ export class Engine {
 
   private update() {
     this.player.update(this.input.getState());
+    this.handleBoundaries();
   }
 
   private render() {
     this.renderer.clear();
-    // this.renderer.drawCircle(this.player.x, this.player.y, this.player.size);
-    this.renderer.drawShip(
-      this.player.x,
-      this.player.y,
-      this.player.angle,
-      this.player.size,
-    );
+
+    const positions = this.getRenderPositions(this.player);
+
+    for (const pos of positions) {
+      this.renderer.drawShip(pos.x, pos.y, this.player.angle, 20);
+    }
+  }
+
+  private handleBoundaries() {
+    const width = this.renderer.width;
+    const height = this.renderer.height;
+
+    this.player.x = (this.player.x + width) % width;
+    this.player.y = (this.player.y + height) % height;
+  }
+
+  private getRenderPositions(player: Player) {
+    const width = 800;
+    const height = 600;
+
+    const positions = [{ x: player.x, y: player.y }];
+
+    const nearLeft = player.x < player.size;
+    const nearRight = player.x > width - player.size;
+    const nearTop = player.y < player.size;
+    const nearBottom = player.y > height - player.size;
+
+    if (nearLeft) positions.push({ x: player.x + width, y: player.y });
+
+    if (nearRight) positions.push({ x: player.x - width, y: player.y });
+
+    if (nearTop) positions.push({ x: player.x, y: player.y + height });
+
+    if (nearBottom) positions.push({ x: player.x, y: player.y - height });
+
+    // Diagonals
+    if (nearLeft && nearTop)
+      positions.push({ x: player.x + width, y: player.y + height });
+
+    if (nearLeft && nearBottom)
+      positions.push({ x: player.x + width, y: player.y - height });
+
+    if (nearRight && nearTop)
+      positions.push({ x: player.x - width, y: player.y + height });
+
+    if (nearRight && nearBottom)
+      positions.push({ x: player.x - width, y: player.y - height });
+
+    return positions;
   }
 }
