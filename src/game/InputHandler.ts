@@ -5,6 +5,10 @@ export interface InputState {
   right: boolean;
 }
 
+interface PlayerInputState {
+  [playerId: number]: InputState;
+}
+
 interface InputConfig {
   up: string;
   down: string;
@@ -12,12 +16,15 @@ interface InputConfig {
   right: string;
 }
 
-interface PlayerInput {
-  [playerId: number]: { config: InputConfig; state: InputState };
+type Actions = "up" | "down" | "left" | "right";
+
+interface KeyMap {
+  [key: string]: { playerId: number; action: Actions };
 }
 
 export class InputHandler {
-  inputs: PlayerInput = {};
+  inputStates: PlayerInputState = {};
+  keyMap: KeyMap = {};
 
   constructor() {
     window.addEventListener("keydown", this.handleKeyDown);
@@ -30,35 +37,37 @@ export class InputHandler {
   }
 
   getState(playerId: number): InputState {
-    if (!this.inputs[playerId])
+    if (!this.inputStates[playerId])
       return { up: false, down: false, left: false, right: false };
-    return { ...this.inputs[playerId].state };
+    return { ...this.inputStates[playerId] };
   }
 
   addPlayer(playerId: number, config: InputConfig) {
-    this.inputs[playerId] = {
-      config,
-      state: { up: false, down: false, left: false, right: false },
+    for (const element in config) {
+      this.keyMap[config[element as Actions]] = {
+        playerId,
+        action: element as Actions,
+      };
+    }
+    this.inputStates[playerId] = {
+      up: false,
+      down: false,
+      left: false,
+      right: false,
     };
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
-    for (const playerId in this.inputs) {
-      const { config } = this.inputs[playerId];
-      if (e.key === config.up) this.inputs[playerId].state.up = true;
-      if (e.key === config.down) this.inputs[playerId].state.down = true;
-      if (e.key === config.left) this.inputs[playerId].state.left = true;
-      if (e.key === config.right) this.inputs[playerId].state.right = true;
+    const mappedKey = this.keyMap[e.key];
+    if (mappedKey) {
+      this.inputStates[mappedKey.playerId][mappedKey.action] = true;
     }
   };
 
   private handleKeyUp = (e: KeyboardEvent) => {
-    for (const playerId in this.inputs) {
-      const { config } = this.inputs[playerId];
-      if (e.key === config.up) this.inputs[playerId].state.up = false;
-      if (e.key === config.down) this.inputs[playerId].state.down = false;
-      if (e.key === config.left) this.inputs[playerId].state.left = false;
-      if (e.key === config.right) this.inputs[playerId].state.right = false;
+    const mappedKey = this.keyMap[e.key];
+    if (mappedKey) {
+      this.inputStates[mappedKey.playerId][mappedKey.action] = false;
     }
   };
 }
