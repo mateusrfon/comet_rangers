@@ -76,7 +76,14 @@ export class Engine {
       const { shoot } = player.update({ delta, input: inputState });
 
       if (shoot) {
-        const bullet = new Bullet(player.x, player.y, player.angle, 2000);
+        const bullet = new Bullet(
+          player.x,
+          player.y,
+          player.velocityX,
+          player.velocityY,
+          player.angle,
+          10,
+        );
         this.gameState.bullets.push(bullet);
       }
 

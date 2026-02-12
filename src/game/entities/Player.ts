@@ -31,7 +31,7 @@ export class Player extends Entity {
     this.x = x;
     this.y = y;
     this.angle = angle || 0;
-    this.acceleration = accel || 10;
+    this.acceleration = accel || 0.1;
     this.rotationSpeed = rot || 0.05;
   }
 
@@ -58,8 +58,8 @@ export class Player extends Entity {
     this.velocityY *= this.friction;
 
     // Update position based on velocity
-    this.x += this.velocityX * delta;
-    this.y += this.velocityY * delta;
+    this.x += this.velocityX;
+    this.y += this.velocityY;
 
     if (input.shoot && this.currentShootCooldown <= 0) {
       response.shoot = true;

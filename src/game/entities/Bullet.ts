@@ -7,11 +7,18 @@ export class Bullet extends Entity {
   alive = true;
   lifetime = 2;
 
-  constructor(x: number, y: number, angle: number, speed: number) {
+  constructor(
+    x: number,
+    y: number,
+    vx: number,
+    vy: number,
+    angle: number,
+    speed: number,
+  ) {
     super(x, y, 2);
 
-    this.vx = Math.cos(angle) * speed;
-    this.vy = Math.sin(angle) * speed;
+    this.vx = vx * 0.5 + Math.cos(angle) * speed;
+    this.vy = vy * 0.5 + Math.sin(angle) * speed;
   }
 
   update({ delta }: { delta: number }) {
@@ -21,7 +28,7 @@ export class Bullet extends Entity {
       return;
     }
 
-    this.x += this.vx * delta;
-    this.y += this.vy * delta;
+    this.x += this.vx;
+    this.y += this.vy;
   }
 }
