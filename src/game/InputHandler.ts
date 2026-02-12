@@ -1,4 +1,3 @@
-// game/InputHandler.ts
 export interface InputState {
   up: boolean;
   down: boolean;
@@ -6,13 +5,19 @@ export interface InputState {
   right: boolean;
 }
 
+interface InputConfig {
+  up: string;
+  down: string;
+  left: string;
+  right: string;
+}
+
+interface PlayerInput {
+  [playerId: number]: { config: InputConfig; state: InputState };
+}
+
 export class InputHandler {
-  private keys: InputState = {
-    up: false,
-    down: false,
-    left: false,
-    right: false,
-  };
+  inputs: PlayerInput = {};
 
   constructor() {
     window.addEventListener("keydown", this.handleKeyDown);
@@ -24,21 +29,36 @@ export class InputHandler {
     window.removeEventListener("keyup", this.handleKeyUp);
   }
 
-  getState(): InputState {
-    return { ...this.keys };
+  getState(playerId: number): InputState {
+    if (!this.inputs[playerId])
+      return { up: false, down: false, left: false, right: false };
+    return { ...this.inputs[playerId].state };
+  }
+
+  addPlayer(playerId: number, config: InputConfig) {
+    this.inputs[playerId] = {
+      config,
+      state: { up: false, down: false, left: false, right: false },
+    };
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "w") this.keys.up = true;
-    if (e.key === "s") this.keys.down = true;
-    if (e.key === "a") this.keys.left = true;
-    if (e.key === "d") this.keys.right = true;
+    for (const playerId in this.inputs) {
+      const { config } = this.inputs[playerId];
+      if (e.key === config.up) this.inputs[playerId].state.up = true;
+      if (e.key === config.down) this.inputs[playerId].state.down = true;
+      if (e.key === config.left) this.inputs[playerId].state.left = true;
+      if (e.key === config.right) this.inputs[playerId].state.right = true;
+    }
   };
 
   private handleKeyUp = (e: KeyboardEvent) => {
-    if (e.key === "w") this.keys.up = false;
-    if (e.key === "s") this.keys.down = false;
-    if (e.key === "a") this.keys.left = false;
-    if (e.key === "d") this.keys.right = false;
+    for (const playerId in this.inputs) {
+      const { config } = this.inputs[playerId];
+      if (e.key === config.up) this.inputs[playerId].state.up = false;
+      if (e.key === config.down) this.inputs[playerId].state.down = false;
+      if (e.key === config.left) this.inputs[playerId].state.left = false;
+      if (e.key === config.right) this.inputs[playerId].state.right = false;
+    }
   };
 }

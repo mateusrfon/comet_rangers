@@ -1,4 +1,5 @@
 import type { Player } from "./entities/Player";
+import type { GameState } from "./GameState";
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
@@ -17,6 +18,13 @@ export class Renderer {
   clear() {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset any transformations
     this.ctx.clearRect(0, 0, this.width, this.height);
+  }
+
+  render(state: GameState) {
+    this.clear();
+    for (const player of state.players) {
+      this.drawPlayer(player);
+    }
   }
 
   drawCircle(x: number, y: number, radius: number) {

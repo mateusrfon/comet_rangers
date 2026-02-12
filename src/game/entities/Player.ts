@@ -1,12 +1,21 @@
 import type { InputState } from "../InputHandler";
 
+interface PlayerConfig {
+  id: number;
+  x: number;
+  y: number;
+  angle?: number;
+}
+
 export class Player {
+  id: number;
+
   x: number;
   y: number;
 
   size = 20;
 
-  angle = 0;
+  angle: number;
   rotationSpeed = 0.05;
 
   velocityX = 0;
@@ -15,9 +24,11 @@ export class Player {
   acceleration = 0.2;
   friction = 0.99;
 
-  constructor(x: number, y: number) {
+  constructor({ id, x, y, angle }: PlayerConfig) {
+    this.id = id;
     this.x = x;
     this.y = y;
+    this.angle = angle || 0;
   }
 
   update(input: InputState) {

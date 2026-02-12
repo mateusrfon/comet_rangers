@@ -1,4 +1,5 @@
 import { Player } from "../entities/Player";
+import { GameState } from "../GameState";
 import { InputHandler } from "../InputHandler";
 import { Renderer } from "../Renderer";
 
@@ -8,14 +9,34 @@ export class Engine {
   private readonly tickRate = 1000 / 60; // 60 FPS
 
   private renderer: Renderer;
-  private player: Player;
-  private input: InputHandler;
+  private gameState = new GameState();
+  private inputHandler = new InputHandler();
   private running = false;
 
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new Renderer(canvas);
-    this.player = new Player(100, 100);
-    this.input = new InputHandler();
+    this.gameState.players.push(new Player({ id: 1, x: 100, y: 100 }));
+    this.gameState.players.push(
+      new Player({
+        id: 2,
+        x: this.renderer.width - 100,
+        y: this.renderer.height - 100,
+        angle: 180 * (Math.PI / 180),
+      }),
+    );
+    this.inputHandler.addPlayer(1, {
+      up: "w",
+      down: "s",
+      left: "a",
+      right: "d",
+    });
+
+    this.inputHandler.addPlayer(2, {
+      up: "ArrowUp",
+      down: "ArrowDown",
+      left: "ArrowLeft",
+      right: "ArrowRight",
+    });
   }
 
   start() {
@@ -40,26 +61,23 @@ export class Engine {
       this.accumulator -= this.tickRate;
     }
 
-    this.render();
+    this.renderer.render(this.gameState);
 
     requestAnimationFrame(this.loop);
   };
 
   private update() {
-    this.player.update(this.input.getState());
-    this.handleBoundaries();
+    for (const player of this.gameState.players) {
+      player.update(this.inputHandler.getState(player.id));
+      this.handleBoundaries(player);
+    }
   }
 
-  private render() {
-    this.renderer.clear();
-    this.renderer.drawPlayer(this.player);
-  }
-
-  private handleBoundaries() {
+  private handleBoundaries(player: Player) {
     const width = this.renderer.width;
     const height = this.renderer.height;
 
-    this.player.x = (this.player.x + width) % width;
-    this.player.y = (this.player.y + height) % height;
+    player.x = (player.x + width) % width;
+    player.y = (player.y + height) % height;
   }
 }
