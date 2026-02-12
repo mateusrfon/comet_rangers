@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Engine } from "./game/Engine";
+import { Engine } from "./game/engine/Engine";
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
