@@ -14,6 +14,13 @@ export default function App() {
     return () => engine.stop();
   }, []);
 
+  // Transform HMR updates into full reloads to reset game state
+  if (import.meta.hot) {
+    import.meta.hot.accept(() => {
+      window.location.reload();
+    });
+  }
+
   return (
     <div style={{ margin: 0, padding: 0, backgroundColor: "green" }}>
       <canvas
