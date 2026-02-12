@@ -1,37 +1,49 @@
 import type { InputState } from "../InputHandler";
+import { Entity } from "./Entity";
 
 interface PlayerConfig {
   id: number;
   x: number;
   y: number;
   angle?: number;
+  accel?: number;
+  rot?: number;
 }
 
-export class Player {
+export class Player extends Entity {
   id: number;
 
-  x: number;
-  y: number;
-
-  size = 20;
-
   angle: number;
-  rotationSpeed = 0.05;
+  rotationSpeed: number;
+  acceleration: number;
 
   velocityX = 0;
   velocityY = 0;
 
-  acceleration = 0.2;
   friction = 0.99;
 
-  constructor({ id, x, y, angle }: PlayerConfig) {
+  shootCooldown = 0.1;
+  currentShootCooldown = 0;
+
+  constructor({ id, x, y, angle, accel, rot }: PlayerConfig) {
+    super(x, y, 20);
     this.id = id;
     this.x = x;
     this.y = y;
     this.angle = angle || 0;
+    this.acceleration = accel || 10;
+    this.rotationSpeed = rot || 0.05;
   }
 
-  update(input: InputState) {
+  update({ delta, input }: { delta: number; input: InputState }): {
+    shoot: boolean;
+  } {
+    const response = {
+      shoot: false,
+    };
+
+    this.currentShootCooldown -= delta;
+
     // Rotation
     if (input.left) this.angle -= this.rotationSpeed;
     if (input.right) this.angle += this.rotationSpeed;
@@ -46,7 +58,14 @@ export class Player {
     this.velocityY *= this.friction;
 
     // Update position based on velocity
-    this.x += this.velocityX;
-    this.y += this.velocityY;
+    this.x += this.velocityX * delta;
+    this.y += this.velocityY * delta;
+
+    if (input.shoot && this.currentShootCooldown <= 0) {
+      response.shoot = true;
+      this.currentShootCooldown = this.shootCooldown; // Reset cooldown
+    }
+
+    return response;
   }
 }

@@ -25,6 +25,9 @@ export class Renderer {
     for (const player of state.players) {
       this.drawPlayer(player);
     }
+    for (const bullet of state.bullets) {
+      this.drawCircle(bullet.x, bullet.y, bullet.size);
+    }
   }
 
   drawCircle(x: number, y: number, radius: number) {

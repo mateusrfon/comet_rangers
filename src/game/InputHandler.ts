@@ -3,10 +3,7 @@ export interface InputState {
   down: boolean;
   left: boolean;
   right: boolean;
-}
-
-interface PlayerInputState {
-  [playerId: number]: InputState;
+  shoot: boolean;
 }
 
 interface InputConfig {
@@ -14,9 +11,14 @@ interface InputConfig {
   down: string;
   left: string;
   right: string;
+  shoot: string;
 }
 
-type Actions = "up" | "down" | "left" | "right";
+type Actions = "up" | "down" | "left" | "right" | "shoot";
+
+interface PlayerInputState {
+  [playerId: number]: InputState;
+}
 
 interface KeyMap {
   [key: string]: { playerId: number; action: Actions };
@@ -38,13 +40,19 @@ export class InputHandler {
 
   getState(playerId: number): InputState {
     if (!this.inputStates[playerId])
-      return { up: false, down: false, left: false, right: false };
+      return {
+        up: false,
+        down: false,
+        left: false,
+        right: false,
+        shoot: false,
+      };
     return { ...this.inputStates[playerId] };
   }
 
   addPlayer(playerId: number, config: InputConfig) {
     for (const element in config) {
-      this.keyMap[config[element as Actions]] = {
+      this.keyMap[config[element as Actions].toLowerCase()] = {
         playerId,
         action: element as Actions,
       };
@@ -54,18 +62,19 @@ export class InputHandler {
       down: false,
       left: false,
       right: false,
+      shoot: false,
     };
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
-    const mappedKey = this.keyMap[e.key];
+    const mappedKey = this.keyMap[e.key.toLowerCase()];
     if (mappedKey) {
       this.inputStates[mappedKey.playerId][mappedKey.action] = true;
     }
   };
 
   private handleKeyUp = (e: KeyboardEvent) => {
-    const mappedKey = this.keyMap[e.key];
+    const mappedKey = this.keyMap[e.key.toLowerCase()];
     if (mappedKey) {
       this.inputStates[mappedKey.playerId][mappedKey.action] = false;
     }
