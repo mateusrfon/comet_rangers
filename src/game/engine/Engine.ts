@@ -135,6 +135,23 @@ export class Engine {
         }
       }
     }
+
+    // Check player-asteroid collisions
+    for (const player of this.gameState.players) {
+      for (const asteroid of this.gameState.asteroids) {
+        if (
+          this.circleVsPolygonCollision(
+            asteroid.x,
+            asteroid.y,
+            asteroid.size,
+            player.getWorldVertices(),
+          )
+        ) {
+          player.alive = false;
+          asteroid.alive = false;
+        }
+      }
+    }
   }
 
   private entityDistanceToroidal(a: Entity, b: Entity): number {
@@ -148,5 +165,57 @@ export class Engine {
     dy = Math.min(dy, height - dy);
 
     return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  private closestPointOnSegment(
+    px: number,
+    py: number, // Circle position
+    ax: number,
+    ay: number, // Segment start
+    bx: number,
+    by: number, // Segment end
+  ) {
+    const abx = bx - ax;
+    const aby = by - ay;
+    const apx = px - ax;
+    const apy = py - ay;
+
+    const abLenSq = abx * abx + aby * aby;
+    const t = Math.max(0, Math.min(1, (apx * abx + apy * aby) / abLenSq));
+
+    return {
+      x: ax + abx * t,
+      y: ay + aby * t,
+    };
+  }
+
+  private circleVsPolygonCollision(
+    circleX: number,
+    circleY: number,
+    radius: number,
+    vertices: { x: number; y: number }[],
+  ): boolean {
+    for (let i = 0; i < vertices.length; i++) {
+      const v1 = vertices[i];
+      const v2 = vertices[(i + 1) % vertices.length];
+
+      const closest = this.closestPointOnSegment(
+        circleX,
+        circleY,
+        v1.x,
+        v1.y,
+        v2.x,
+        v2.y,
+      );
+
+      const dx = circleX - closest.x;
+      const dy = circleY - closest.y;
+
+      if (dx * dx + dy * dy < radius * radius) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

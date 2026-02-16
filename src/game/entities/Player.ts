@@ -22,6 +22,8 @@ export class Player extends Entity {
   shootCooldown = 0.1;
   currentShootCooldown = 0;
 
+  private localVertices: { x: number; y: number }[];
+
   constructor({ id, x, y, angle, accel, rot }: PlayerConfig) {
     super("player", x, y, 20);
     this.id = id;
@@ -30,6 +32,20 @@ export class Player extends Entity {
     this.angle = angle || 0;
     this.acceleration = accel || 0.1;
     this.rotationSpeed = rot || 0.05;
+    this.localVertices = [
+      { x: this.size, y: 0 }, // tip
+      { x: -this.size, y: this.size / 1.5 }, // left
+      { x: -this.size, y: -this.size / 1.5 }, // right
+    ];
+  }
+
+  getWorldVertices() {
+    const cos = Math.cos(this.angle);
+    const sin = Math.sin(this.angle);
+    return this.localVertices.map((v) => ({
+      x: this.x + v.x * cos - v.y * sin,
+      y: this.y + v.x * sin + v.y * cos,
+    }));
   }
 
   update({ delta, input }: { delta: number; input: InputState }): {
