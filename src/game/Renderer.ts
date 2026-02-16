@@ -1,3 +1,4 @@
+import type { Entity } from "./entities/Entity";
 import type { Player } from "./entities/Player";
 import type { GameState } from "./GameState";
 
@@ -23,10 +24,13 @@ export class Renderer {
   render(state: GameState) {
     this.clear();
     for (const player of state.players) {
-      this.drawPlayer(player);
+      this.drawEntity(player);
     }
     for (const bullet of state.bullets) {
-      this.drawCircle(bullet.x, bullet.y, bullet.size);
+      this.drawCircle(bullet.x, bullet.y, bullet.size); // no need for render positions since bullets are small and won't wrap visually
+    }
+    for (const asteroid of state.asteroids) {
+      this.drawEntity(asteroid);
     }
   }
 
@@ -59,10 +63,16 @@ export class Renderer {
     this.ctx.restore();
   }
 
-  drawPlayer(player: Player) {
-    const positions = this.getRenderPositions(player.x, player.y, player.size);
-    for (const pos of positions) {
-      this.drawTriangle(pos.x, pos.y, player.angle, player.size);
+  drawEntity(entity: Entity) {
+    const positions = this.getRenderPositions(entity.x, entity.y, entity.size);
+    if (entity.type === "player") {
+      for (const pos of positions) {
+        this.drawTriangle(pos.x, pos.y, (entity as Player).angle, entity.size);
+      }
+    } else {
+      for (const pos of positions) {
+        this.drawCircle(pos.x, pos.y, entity.size);
+      }
     }
   }
 

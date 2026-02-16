@@ -17,16 +17,13 @@ export class Player extends Entity {
   rotationSpeed: number;
   acceleration: number;
 
-  velocityX = 0;
-  velocityY = 0;
-
   friction = 0.99;
 
   shootCooldown = 0.1;
   currentShootCooldown = 0;
 
   constructor({ id, x, y, angle, accel, rot }: PlayerConfig) {
-    super(x, y, 20);
+    super("player", x, y, 20);
     this.id = id;
     this.x = x;
     this.y = y;
@@ -49,17 +46,17 @@ export class Player extends Entity {
     if (input.right) this.angle += this.rotationSpeed;
 
     if (input.up) {
-      this.velocityX += Math.cos(this.angle) * this.acceleration;
-      this.velocityY += Math.sin(this.angle) * this.acceleration;
+      this.vx += Math.cos(this.angle) * this.acceleration;
+      this.vy += Math.sin(this.angle) * this.acceleration;
     }
 
     // Apply friction
-    this.velocityX *= this.friction;
-    this.velocityY *= this.friction;
+    this.vx *= this.friction;
+    this.vy *= this.friction;
 
     // Update position based on velocity
-    this.x += this.velocityX;
-    this.y += this.velocityY;
+    this.x += this.vx;
+    this.y += this.vy;
 
     if (input.shoot && this.currentShootCooldown <= 0) {
       response.shoot = true;

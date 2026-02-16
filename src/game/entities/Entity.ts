@@ -1,9 +1,16 @@
+type EntityType = "player" | "bullet" | "asteroid";
+
 export abstract class Entity {
+  readonly type: EntityType;
   x: number;
   y: number;
+  vx = 0;
+  vy = 0;
   size: number;
+  alive = true;
 
-  constructor(x: number, y: number, size: number) {
+  constructor(type: EntityType, x: number, y: number, size: number) {
+    this.type = type;
     this.x = x;
     this.y = y;
     this.size = size;

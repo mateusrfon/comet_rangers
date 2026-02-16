@@ -1,3 +1,4 @@
+import { Asteroid } from "../entities/Asteroid";
 import { Bullet } from "../entities/Bullet";
 import type { Entity } from "../entities/Entity";
 import { Player } from "../entities/Player";
@@ -26,6 +27,10 @@ export class Engine {
         angle: 180 * (Math.PI / 180),
       }),
     );
+    this.gameState.asteroids.push(new Asteroid(200, 150, 80, 10)); //80/10 40/30 20/90 10/270
+    this.gameState.asteroids.push(new Asteroid(200, 150, 40, 30)); //80/10 40/30 20/90 10/270
+    this.gameState.asteroids.push(new Asteroid(200, 150, 20, 90)); //80/10 40/30 20/90 10/270
+    this.gameState.asteroids.push(new Asteroid(200, 150, 10, 270)); //80/10 40/30 20/90 10/270
     this.inputHandler.addPlayer(1, {
       up: "w",
       down: "s",
@@ -79,8 +84,8 @@ export class Engine {
         const bullet = new Bullet(
           player.x,
           player.y,
-          player.velocityX,
-          player.velocityY,
+          player.vx,
+          player.vy,
           player.angle,
           10,
         );
@@ -94,6 +99,11 @@ export class Engine {
     for (const bullet of this.gameState.bullets) {
       bullet.update({ delta });
       this.handleBoundaries(bullet);
+    }
+
+    for (const asteroid of this.gameState.asteroids) {
+      asteroid.update({ delta });
+      this.handleBoundaries(asteroid);
     }
   }
 

@@ -1,10 +1,6 @@
 import { Entity } from "./Entity";
 
 export class Bullet extends Entity {
-  vx: number;
-  vy: number;
-
-  alive = true;
   lifetime = 2;
 
   constructor(
@@ -15,7 +11,7 @@ export class Bullet extends Entity {
     angle: number,
     speed: number,
   ) {
-    super(x, y, 2);
+    super("bullet", x, y, 2);
 
     this.vx = vx * 0.5 + Math.cos(angle) * speed;
     this.vy = vy * 0.5 + Math.sin(angle) * speed;
