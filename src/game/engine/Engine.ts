@@ -67,6 +67,8 @@ export class Engine {
 
     while (this.accumulator >= this.tickRate) {
       this.update(this.tickRate);
+      this.handleCollisions();
+      this.cleanupEntities();
       this.accumulator -= this.tickRate;
     }
 
@@ -95,7 +97,6 @@ export class Engine {
       this.handleBoundaries(player);
     }
 
-    this.gameState.bullets = this.gameState.bullets.filter((b) => b.alive);
     for (const bullet of this.gameState.bullets) {
       bullet.update({ delta });
       this.handleBoundaries(bullet);
@@ -107,11 +108,45 @@ export class Engine {
     }
   }
 
+  private cleanupEntities() {
+    this.gameState.players = this.gameState.players.filter((p) => p.alive);
+    this.gameState.bullets = this.gameState.bullets.filter((b) => b.alive);
+    this.gameState.asteroids = this.gameState.asteroids.filter((a) => a.alive);
+  }
+
   private handleBoundaries(entity: Entity) {
     const width = this.renderer.width;
     const height = this.renderer.height;
 
     entity.x = (entity.x + width) % width;
     entity.y = (entity.y + height) % height;
+  }
+
+  private handleCollisions() {
+    // Check bullet-asteroid collisions
+    for (const bullet of this.gameState.bullets) {
+      for (const asteroid of this.gameState.asteroids) {
+        if (
+          this.entityDistanceToroidal(bullet, asteroid) <
+          bullet.size + asteroid.size
+        ) {
+          bullet.alive = false;
+          asteroid.alive = false;
+        }
+      }
+    }
+  }
+
+  private entityDistanceToroidal(a: Entity, b: Entity): number {
+    const width = this.renderer.width;
+    const height = this.renderer.height;
+
+    let dx = Math.abs(a.x - b.x);
+    let dy = Math.abs(a.y - b.y);
+
+    dx = Math.min(dx, width - dx);
+    dy = Math.min(dy, height - dy);
+
+    return Math.sqrt(dx * dx + dy * dy);
   }
 }
