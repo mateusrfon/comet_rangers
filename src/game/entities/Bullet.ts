@@ -1,9 +1,13 @@
 import { Entity } from "./Entity";
 
 export class Bullet extends Entity {
-  lifetime = 2;
+  lifetime = 1;
+  prevX: number;
+  prevY: number;
+  ownerId: number;
 
   constructor(
+    ownerId: number,
     x: number,
     y: number,
     vx: number,
@@ -12,6 +16,11 @@ export class Bullet extends Entity {
     speed: number,
   ) {
     super("bullet", x, y, 2);
+
+    this.ownerId = ownerId;
+
+    this.prevX = x;
+    this.prevY = y;
 
     this.vx = vx * 0.5 + Math.cos(angle) * speed;
     this.vy = vy * 0.5 + Math.sin(angle) * speed;
@@ -23,6 +32,8 @@ export class Bullet extends Entity {
       this.alive = false;
       return;
     }
+    this.prevX = this.x;
+    this.prevY = this.y;
 
     this.x += this.vx;
     this.y += this.vy;

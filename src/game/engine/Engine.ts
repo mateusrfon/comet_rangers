@@ -83,9 +83,11 @@ export class Engine {
       const { shoot } = player.update({ delta, input: inputState });
 
       if (shoot) {
+        const playerTip = player.getWorldVertices()[0];
         const bullet = new Bullet(
-          player.x,
-          player.y,
+          player.id,
+          playerTip.x,
+          playerTip.y,
           player.vx,
           player.vy,
           player.angle,
@@ -136,19 +138,56 @@ export class Engine {
       }
     }
 
-    // Check player-asteroid collisions
     for (const player of this.gameState.players) {
+      const playerVertices = player.getWorldVertices();
+      // Check player-asteroid collisions
       for (const asteroid of this.gameState.asteroids) {
         if (
           this.circleVsPolygonCollision(
             asteroid.x,
             asteroid.y,
             asteroid.size,
-            player.getWorldVertices(),
+            playerVertices,
           )
         ) {
           player.alive = false;
           asteroid.alive = false;
+        }
+      }
+      // Check player-bullet collisions
+      for (const bullet of this.gameState.bullets) {
+        if (bullet.ownerId === player.id) continue; // Skip self-collisions
+        for (let i = 0; i < playerVertices.length; i++) {
+          const v1 = playerVertices[i];
+          const v2 = playerVertices[(i + 1) % playerVertices.length];
+          const intersection = this.segmentIntersect(
+            bullet.prevX,
+            bullet.prevY,
+            bullet.x,
+            bullet.y,
+            v1.x,
+            v1.y,
+            v2.x,
+            v2.y,
+          );
+          if (intersection) {
+            bullet.alive = false;
+
+            const dirX = bullet.vx;
+            const dirY = bullet.vy;
+
+            const force = 0.5;
+            const impulseX = dirX * force;
+            const impulseY = dirY * force;
+
+            player.applyImpulse(
+              impulseX,
+              impulseY,
+              intersection.hitX,
+              intersection.hitY,
+            );
+            break;
+          }
         }
       }
     }
@@ -169,7 +208,7 @@ export class Engine {
 
   private closestPointOnSegment(
     px: number,
-    py: number, // Circle position
+    py: number, // Point position
     ax: number,
     ay: number, // Segment start
     bx: number,
@@ -194,7 +233,7 @@ export class Engine {
     circleY: number,
     radius: number,
     vertices: { x: number; y: number }[],
-  ): boolean {
+  ): { dx: number; dy: number; distance: number } | null {
     for (let i = 0; i < vertices.length; i++) {
       const v1 = vertices[i];
       const v2 = vertices[(i + 1) % vertices.length];
@@ -211,11 +250,81 @@ export class Engine {
       const dx = circleX - closest.x;
       const dy = circleY - closest.y;
 
-      if (dx * dx + dy * dy < radius * radius) {
-        return true;
+      const distanceSq = dx * dx + dy * dy;
+
+      if (distanceSq < radius * radius) {
+        return { dx, dy, distance: Math.sqrt(distanceSq) };
       }
     }
 
-    return false;
+    return null;
+  }
+
+  private segmentIntersect(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    x3: number,
+    y3: number,
+    x4: number,
+    y4: number,
+  ): { hitX: number; hitY: number; distance: number } | null {
+    const width = this.renderer.width;
+    const height = this.renderer.height;
+
+    const d1x = x2 - x1;
+    const d1y = y2 - y1;
+
+    let closestHit = null;
+
+    const offsets = [-1, 0, 1];
+
+    for (const ox of offsets) {
+      for (const oy of offsets) {
+        const ax3 = x3 + ox * width;
+        const ay3 = y3 + oy * height;
+        const ax4 = x4 + ox * width;
+        const ay4 = y4 + oy * height;
+
+        const d2x = ax4 - ax3;
+        const d2y = ay4 - ay3;
+
+        const denom = d1x * d2y - d1y * d2x;
+
+        if (denom === 0) continue;
+
+        const dx = ax3 - x1;
+        const dy = ay3 - y1;
+
+        const t = (dx * d2y - dy * d2x) / denom;
+        const u = (dx * d1y - dy * d1x) / denom;
+
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+          const hitX = x1 + t * d1x;
+          const hitY = y1 + t * d1y;
+
+          const distSq = (hitX - x1) * (hitX - x1) + (hitY - y1) * (hitY - y1);
+
+          if (!closestHit || distSq < closestHit.distance) {
+            closestHit = {
+              x: hitX,
+              y: hitY,
+              distance: distSq,
+            };
+          }
+        }
+      }
+    }
+
+    if (!closestHit) {
+      return null;
+    }
+
+    return {
+      hitX: closestHit.x,
+      hitY: closestHit.y,
+      distance: Math.sqrt(closestHit.distance),
+    };
   }
 }
