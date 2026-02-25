@@ -8,10 +8,15 @@ interface PlayerConfig {
   angle?: number;
   accel?: number;
   rot?: number;
+  life?: number;
 }
 
 export class Player extends Entity {
   id: number;
+
+  life: number;
+  score = 0;
+  private readonly spawn: { x: number; y: number; angle: number };
 
   angle: number;
   rotationSpeed: number;
@@ -22,23 +27,36 @@ export class Player extends Entity {
   shootCooldown = 0.1;
   currentShootCooldown = 0;
 
+  respawnCooldown = 3;
+  currentRespawnCooldown = this.respawnCooldown;
+
   public angularVelocity = 0;
 
   private localVertices: { x: number; y: number }[];
 
-  constructor({ id, x, y, angle, accel, rot }: PlayerConfig) {
+  constructor({
+    id,
+    x,
+    y,
+    angle = 0,
+    accel = 0.1,
+    rot = 0.05,
+    life = 5,
+  }: PlayerConfig) {
     super("player", x, y, 20);
     this.id = id;
     this.x = x;
     this.y = y;
-    this.angle = angle || 0;
-    this.acceleration = accel || 0.1;
-    this.rotationSpeed = rot || 0.05;
+    this.life = life;
+    this.angle = angle;
+    this.acceleration = accel;
+    this.rotationSpeed = rot;
     this.localVertices = [
       { x: this.size, y: 0 }, // tip
       { x: -this.size, y: this.size / 1.5 }, // left
       { x: -this.size, y: -this.size / 1.5 }, // right
     ];
+    this.spawn = { x, y, angle };
   }
 
   getWorldVertices() {
@@ -70,6 +88,15 @@ export class Player extends Entity {
       shoot: false,
     };
 
+    if (this.life > 0 && this.currentRespawnCooldown <= 0) {
+      this.currentRespawnCooldown = this.respawnCooldown;
+      this.respawn();
+    }
+    if (this.isAlive == false) {
+      this.currentRespawnCooldown -= delta;
+      return response;
+    }
+
     this.currentShootCooldown -= delta;
 
     // Rotation
@@ -99,5 +126,17 @@ export class Player extends Entity {
     }
 
     return response;
+  }
+
+  respawn() {
+    this.x = this.spawn.x;
+    this.y = this.spawn.y;
+    this.angle = this.spawn.angle;
+    this.vx = 0;
+    this.vy = 0;
+    this.angularVelocity = 0;
+    this.isAlive = true;
+    this.life -= 1;
+    this.currentShootCooldown = 0;
   }
 }

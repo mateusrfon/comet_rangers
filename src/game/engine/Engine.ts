@@ -81,6 +81,7 @@ export class Engine {
     for (const player of this.gameState.players) {
       const inputState = this.inputHandler.getState(player.id);
       const { shoot } = player.update({ delta, input: inputState });
+      if (!player.isAlive) continue;
 
       if (shoot) {
         const playerTip = player.getWorldVertices()[0];
@@ -111,9 +112,10 @@ export class Engine {
   }
 
   private cleanupEntities() {
-    this.gameState.players = this.gameState.players.filter((p) => p.alive);
-    this.gameState.bullets = this.gameState.bullets.filter((b) => b.alive);
-    this.gameState.asteroids = this.gameState.asteroids.filter((a) => a.alive);
+    this.gameState.bullets = this.gameState.bullets.filter((b) => b.isAlive);
+    this.gameState.asteroids = this.gameState.asteroids.filter(
+      (a) => a.isAlive,
+    );
   }
 
   private handleBoundaries(entity: Entity) {
@@ -132,8 +134,8 @@ export class Engine {
           this.entityDistanceToroidal(bullet, asteroid) <
           bullet.size + asteroid.size
         ) {
-          bullet.alive = false;
-          asteroid.alive = false;
+          bullet.isAlive = false;
+          asteroid.isAlive = false;
         }
       }
     }
@@ -150,8 +152,8 @@ export class Engine {
             playerVertices,
           )
         ) {
-          player.alive = false;
-          asteroid.alive = false;
+          player.isAlive = false;
+          asteroid.isAlive = false;
         }
       }
       // Check player-bullet collisions
@@ -171,7 +173,7 @@ export class Engine {
             v2.y,
           );
           if (intersection) {
-            bullet.alive = false;
+            bullet.isAlive = false;
 
             const dirX = bullet.vx;
             const dirY = bullet.vy;

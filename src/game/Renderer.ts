@@ -24,6 +24,7 @@ export class Renderer {
   render(state: GameState) {
     this.clear();
     for (const player of state.players) {
+      if (!player.isAlive) continue;
       this.drawEntity(player);
     }
     for (const bullet of state.bullets) {

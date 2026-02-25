@@ -7,7 +7,7 @@ export abstract class Entity {
   vx = 0;
   vy = 0;
   size: number;
-  alive = true;
+  isAlive = true;
 
   constructor(type: EntityType, x: number, y: number, size: number) {
     this.type = type;

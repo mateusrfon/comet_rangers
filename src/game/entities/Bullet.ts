@@ -29,7 +29,7 @@ export class Bullet extends Entity {
   update({ delta }: { delta: number }) {
     this.lifetime -= delta;
     if (this.lifetime <= 0) {
-      this.alive = false;
+      this.isAlive = false;
       return;
     }
     this.prevX = this.x;
