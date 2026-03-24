@@ -17,28 +17,30 @@ interface InputConfig {
 type Actions = "up" | "down" | "left" | "right" | "shoot";
 
 interface PlayerInputState {
-  [playerId: number]: InputState;
+  [playerId: string]: InputState;
 }
 
 interface KeyMap {
-  [key: string]: { playerId: number; action: Actions };
+  [key: string]: { playerId: string; action: Actions };
 }
 
 export class InputHandler {
-  inputStates: PlayerInputState = {};
-  keyMap: KeyMap = {};
+  private inputStates: PlayerInputState = {};
+  private keyMap: KeyMap = {};
 
-  constructor() {
+  constructor() {}
+
+  public start() {
     window.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("keyup", this.handleKeyUp);
   }
 
-  destroy() {
+  public stop() {
     window.removeEventListener("keydown", this.handleKeyDown);
     window.removeEventListener("keyup", this.handleKeyUp);
   }
 
-  getState(playerId: number): InputState {
+  public getState(playerId: string): InputState {
     if (!this.inputStates[playerId])
       return {
         up: false,
@@ -50,7 +52,7 @@ export class InputHandler {
     return { ...this.inputStates[playerId] };
   }
 
-  addPlayer(playerId: number, config: InputConfig) {
+  public addPlayer(playerId: string, config: InputConfig) {
     for (const element in config) {
       this.keyMap[config[element as Actions].toLowerCase()] = {
         playerId,

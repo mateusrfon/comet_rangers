@@ -1,5 +1,5 @@
-import type { Entity } from "./entities/Entity";
-import type { Player } from "./entities/Player";
+import type { Entity } from "../entities/Entity";
+import type { Player } from "../entities/Player";
 import type { GameState } from "./GameState";
 
 export class Renderer {
@@ -23,7 +23,7 @@ export class Renderer {
 
   render(state: GameState) {
     this.clear();
-    for (const player of state.players) {
+    for (const player of state.players.values()) {
       if (!player.isAlive) continue;
       this.drawEntity(player);
     }
