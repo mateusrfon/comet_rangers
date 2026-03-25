@@ -1,0 +1,58 @@
+.container {
+  background-color: white;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, #111 0%, #050505 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+}
+
+.menu-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  min-width: 300px;
+}
+
+.title {
+  font-size: 120px;
+  margin-bottom: 40px;
+  letter-spacing: 2px;
+}
+
+.buttonGroup {
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  width: fit-content;
+}
+
+.button {
+  font-size: 30px;
+  padding: 12px 20px;
+  background: #1f1f1f;
+  border: 1px solid #333;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+  /* border-radius: 10px; */
+}
+
+.backButton {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid #555;
+  color: #aaa;
+  cursor: pointer;
+}

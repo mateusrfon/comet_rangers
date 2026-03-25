@@ -1,6 +1,6 @@
-import { GameState } from "../game/GameState";
-import type { InputHandler } from "../game/InputHandler";
-import { Renderer } from "../game/Renderer";
+import { GameState } from "./GameState";
+import type { InputHandler } from "./InputHandler";
+import { Renderer } from "./Renderer";
 import type { GameClient } from "../network/GameClient";
 import type { GameStateDTO } from "../network/protocol";
 
@@ -9,6 +9,7 @@ export class Engine {
   private lastTime = 0;
   private accumulator = 0;
   private readonly tickRate = 1 / 60; // 60 FPS
+  private lastState: GameStateDTO | undefined;
 
   public gameState = new GameState();
   private running = false;
@@ -19,7 +20,10 @@ export class Engine {
     private gameClient: GameClient,
   ) {
     this.gameClient.onState((state: GameStateDTO) => {
-      this.gameState.applySnapshot(state);
+      if (!this.lastState) this.lastState = state;
+      if (state.tick > this.lastState.tick) {
+        this.lastState = state;
+      }
     });
   }
 
@@ -31,20 +35,7 @@ export class Engine {
     return this.lastTime;
   }
 
-  private timeout(delay: number) {
-    return new Promise((res) => setTimeout(res, delay));
-  }
-
-  private async waitForConnection() {
-    while (!this.gameClient.isReady()) {
-      console.log("Waiting for server...");
-      await this.timeout(500);
-    }
-  }
-
   async init() {
-    await this.waitForConnection();
-
     this.inputHandler.addPlayer(this.gameClient.userId!, {
       up: "w",
       down: "s",
@@ -53,8 +44,6 @@ export class Engine {
       shoot: "shift",
     });
     this.inputHandler.start();
-    this.gameClient.createRoom();
-    this.gameClient.startGame();
   }
 
   async start() {
@@ -71,8 +60,13 @@ export class Engine {
 
   private loop = (currentTime: number) => {
     if (!this.running) return;
+    if (this.lastState) {
+      this.gameState.applySnapshot(this.lastState);
+    }
 
-    if (!this.lastTime) this.lastTime = currentTime;
+    if (!this.lastTime) {
+      this.lastTime = currentTime;
+    }
     const delta = (currentTime - this.lastTime) / 1000; // Convert to seconds
     this.lastTime = currentTime;
     this.accumulator += delta;
