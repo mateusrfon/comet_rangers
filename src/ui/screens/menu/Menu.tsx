@@ -4,40 +4,16 @@ import styles from "../screen.module.css";
 type MenuProps = {
   createRoom: () => void;
   goToSettings: () => void;
+  joinRoom: (roomId: string) => void;
 };
 
-export const Menu: React.FC<MenuProps> = ({ createRoom, goToSettings }) => {
+export const Menu: React.FC<MenuProps> = ({
+  createRoom,
+  goToSettings,
+  joinRoom,
+}) => {
   const [join, setJoin] = useState(false);
-
-  // =========================
-  // HANDLERS (ligar depois)
-  // =========================
-
-  //   const handleCreateRoom = () => {
-  //     // TODO:
-  //     // Criar sala via websocket/backend
-  //     // socket.emit("create-room")
-
-  //     console.log("Criar sala");
-
-  //     // Próxima tela (ex: waiting room)
-  //     // setScreen("room")
-  //   };
-
-  //   const handleJoinRoom = () => {
-  //     // TODO:
-  //     // Entrar na sala via backend
-  //     // socket.emit("join-room", roomCode)
-
-  //     console.log("Entrar na sala:", roomCode);
-
-  //     // Próxima tela
-  //     // setScreen("room")
-  //   };
-
-  // =========================
-  // RENDER
-  // =========================
+  const [roomId, setRoomId] = useState("");
 
   return (
     <div className={styles.container}>
@@ -49,14 +25,34 @@ export const Menu: React.FC<MenuProps> = ({ createRoom, goToSettings }) => {
           </button>
 
           {join ? (
-            <input />
+            <>
+              {/* <div className={styles.buttonGroup}> */}
+              <input
+                className={styles.input}
+                onChange={(event) => setRoomId(event.target.value)}
+              />
+              <button
+                className={styles.button}
+                onClick={() => joinRoom(roomId)}
+              >
+                Confirm
+              </button>
+              <button className={styles.button} onClick={() => setJoin(false)}>
+                Cancel
+              </button>
+              {/* </div> */}
+            </>
           ) : (
             <button className={styles.button} onClick={() => setJoin(true)}>
               Join Room
             </button>
           )}
 
-          <button className={styles.button} onClick={() => goToSettings()}>
+          <button
+            className={styles.button}
+            disabled={true}
+            onClick={() => goToSettings()}
+          >
             Settings
           </button>
         </div>

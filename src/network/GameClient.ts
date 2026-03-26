@@ -12,6 +12,7 @@ export class GameClient {
   private onPlayerLeft: (id: string) => void;
   private onStart: () => void;
   private onRoomCreated: (roomId: string) => void;
+  private onRoomJoined: (roomId: string) => void;
   private onConnected: () => void;
   private ws: WebSocket;
   public userId?: string | undefined;
@@ -22,18 +23,21 @@ export class GameClient {
     onPlayerLeft,
     onStart,
     onRoomCreated,
+    onRoomJoined,
     onConnected,
   }: {
     onLeave: () => void;
     onPlayerLeft: (id: string) => void;
     onStart: () => void;
     onRoomCreated: (roomId: string) => void;
+    onRoomJoined: (roomId: string) => void;
     onConnected: () => void;
   }) {
     this.onLeave = onLeave;
     this.onPlayerLeft = onPlayerLeft;
     this.onStart = onStart;
     this.onRoomCreated = onRoomCreated;
+    this.onRoomJoined = onRoomJoined;
     this.onConnected = onConnected;
 
     this.ws = new WebSocket(`ws://localhost:8080`);
@@ -60,6 +64,9 @@ export class GameClient {
           break;
         case "room_created":
           this.onRoomCreated(msg.roomId);
+          break;
+        case "room_joined":
+          this.onRoomJoined(msg.roomId);
           break;
         case "room_left":
           this.onLeave();
@@ -123,6 +130,13 @@ export class GameClient {
   public createRoom() {
     this.send({
       type: "create_room",
+    });
+  }
+
+  public joinRoom(roomId: string) {
+    this.send({
+      type: "join_room",
+      roomId,
     });
   }
 

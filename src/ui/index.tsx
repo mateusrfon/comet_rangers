@@ -31,6 +31,10 @@ export default function Game() {
       onConnected: () => {
         setIsConnected(true);
       },
+      onRoomJoined: (roomId) => {
+        setRoomId(roomId);
+        setScreen("room");
+      },
     });
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -57,6 +61,7 @@ export default function Game() {
           // status (joining - input + buttons, creating - loading effect)
           createRoom={() => gameClient.createRoom()}
           goToSettings={() => console.log("not yet")}
+          joinRoom={(roomId) => gameClient.joinRoom(roomId)}
         />
       )}
       {screen === "room" && roomId && (

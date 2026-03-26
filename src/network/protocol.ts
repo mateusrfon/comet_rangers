@@ -46,6 +46,7 @@ export type ServerMessage =
   | { type: "room_created"; roomId: string }
   | { type: "room_joined"; roomId: string }
   | { type: "room_left"; roomId: string }
+  | { type: "room_not_found"; roomId: string }
   | { type: "player_joined"; playerId: string }
   | { type: "player_left"; playerId: string }
   | { type: "room_not_found" }
