@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "../screen.module.css";
 
 type MenuProps = {
@@ -15,6 +15,15 @@ export const Menu: React.FC<MenuProps> = ({
   const [join, setJoin] = useState(false);
   const [roomId, setRoomId] = useState("");
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (join && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select(); // optional
+    }
+  }, [join]);
+
   return (
     <div className={styles.container}>
       <div className={styles.menuBox}>
@@ -28,6 +37,7 @@ export const Menu: React.FC<MenuProps> = ({
             <>
               {/* <div className={styles.buttonGroup}> */}
               <input
+                ref={inputRef}
                 className={styles.input}
                 onChange={(event) => setRoomId(event.target.value)}
               />
@@ -43,7 +53,12 @@ export const Menu: React.FC<MenuProps> = ({
               {/* </div> */}
             </>
           ) : (
-            <button className={styles.button} onClick={() => setJoin(true)}>
+            <button
+              className={styles.button}
+              onClick={() => {
+                setJoin(true);
+              }}
+            >
               Join Room
             </button>
           )}
