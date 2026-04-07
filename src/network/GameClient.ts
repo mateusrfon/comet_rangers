@@ -4,15 +4,17 @@ import {
   encodeMessage,
   type ClientMessage,
   type GameStateDTO,
+  type RoomInfo,
 } from "./protocol";
 
 export class GameClient {
   private onStateCallback?: (state: GameStateDTO) => void;
   private onLeave: () => void;
-  private onPlayerLeft: (id: string) => void;
+  private onPlayerLeft: (room: RoomInfo) => void;
+  private onPlayerJoined: (room: RoomInfo) => void;
   private onStart: () => void;
-  private onRoomCreated: (roomId: string) => void;
-  private onRoomJoined: (roomId: string) => void;
+  private onRoomCreated: (room: RoomInfo) => void;
+  private onRoomJoined: () => void;
   private onConnected: () => void;
   private ws: WebSocket;
   public userId?: string | undefined;
@@ -21,20 +23,23 @@ export class GameClient {
   constructor({
     onLeave,
     onPlayerLeft,
+    onPlayerJoined,
     onStart,
     onRoomCreated,
     onRoomJoined,
     onConnected,
   }: {
     onLeave: () => void;
-    onPlayerLeft: (id: string) => void;
+    onPlayerLeft: (room: RoomInfo) => void;
+    onPlayerJoined: (room: RoomInfo) => void;
     onStart: () => void;
-    onRoomCreated: (roomId: string) => void;
-    onRoomJoined: (roomId: string) => void;
+    onRoomCreated: (room: RoomInfo) => void;
+    onRoomJoined: () => void;
     onConnected: () => void;
   }) {
     this.onLeave = onLeave;
     this.onPlayerLeft = onPlayerLeft;
+    this.onPlayerJoined = onPlayerJoined;
     this.onStart = onStart;
     this.onRoomCreated = onRoomCreated;
     this.onRoomJoined = onRoomJoined;
@@ -55,31 +60,37 @@ export class GameClient {
       const msg = decodeMessage(data);
 
       if (!msg || !msg.type) return;
+      console.log(msg);
 
       switch (msg?.type) {
         case "user_connected":
-          console.log(`Connected to server as: ${msg.userId}`);
-          this.userId = msg.userId;
+          console.log(`Connected to server as: ${msg.data.userId}`);
+          this.userId = msg.data.userId;
           this.onConnected();
           break;
         case "room_created":
-          this.onRoomCreated(msg.roomId);
+          this.onRoomCreated(msg.data.room);
           break;
         case "room_joined":
-          this.onRoomJoined(msg.roomId);
+          this.onRoomJoined();
           break;
         case "room_left":
           this.onLeave();
           break;
+        case "player_joined":
+          this.onPlayerJoined(msg.data.room);
+          break;
         case "player_left":
-          this.onPlayerLeft(msg.playerId);
+          this.onPlayerLeft(msg.data.room);
           break;
         case "game_started":
           this.onStart();
           break;
         case "game_state":
-          this.onStateCallback?.(msg.state);
+          this.onStateCallback?.(msg.data.state);
           break;
+        default:
+          console.log(msg);
       }
     };
 
@@ -136,7 +147,7 @@ export class GameClient {
   public joinRoom(roomId: string) {
     this.send({
       type: "join_room",
-      roomId,
+      data: { roomId },
     });
   }
 

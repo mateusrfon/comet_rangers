@@ -3,14 +3,19 @@ import GameView from "./GameView";
 import { Menu } from "./screens/menu/Menu";
 import { useEffect, useState } from "react";
 import { Room } from "./screens/room/Room";
+import type { RoomInfo } from "../network/protocol";
 
 type Screen = "menu" | "room" | "join" | "settings" | "game";
 
 export default function Game() {
   const [gameClient, setGameClient] = useState<GameClient | null>(null);
   const [screen, setScreen] = useState<Screen>("menu");
-  const [roomId, setRoomId] = useState<string>();
   const [isConnected, setIsConnected] = useState(false);
+  const [room, setRoom] = useState<RoomInfo>({
+    id: "",
+    hostId: "",
+    players: [],
+  });
 
   // Initialize game client
   useEffect(() => {
@@ -18,21 +23,25 @@ export default function Game() {
       onLeave: () => {
         setScreen("menu");
       },
-      onPlayerLeft: (id: string) => {
-        console.log(`Player ${id} left the room.`);
+      onPlayerLeft: (room: RoomInfo) => {
+        console.log(`Player left the room.`);
+        setRoom(room);
+      },
+      onPlayerJoined: (room: RoomInfo) => {
+        console.log(`Player joined the room.`);
+        setRoom(room);
       },
       onStart: () => {
         setScreen("game");
       },
-      onRoomCreated: (roomId) => {
-        setRoomId(roomId);
+      onRoomCreated: (room: RoomInfo) => {
+        setRoom(room);
         setScreen("room");
       },
       onConnected: () => {
         setIsConnected(true);
       },
-      onRoomJoined: (roomId) => {
-        setRoomId(roomId);
+      onRoomJoined: () => {
         setScreen("room");
       },
     });
@@ -52,7 +61,7 @@ export default function Game() {
   //   });
   // }
 
-  if (!isConnected || !gameClient) return <>Loading</>;
+  if (!isConnected || !gameClient?.userId) return <>Loading</>;
 
   return (
     <>
@@ -64,11 +73,12 @@ export default function Game() {
           joinRoom={(roomId) => gameClient.joinRoom(roomId)}
         />
       )}
-      {screen === "room" && roomId && (
+      {screen === "room" && room.id && (
         <Room
           startGame={() => gameClient.startGame()}
           leaveRoom={() => gameClient.leaveRoom()}
-          roomId={roomId}
+          room={room}
+          userId={gameClient.userId}
         />
       )}
       {screen === "game" && <GameView gameClient={gameClient} />}

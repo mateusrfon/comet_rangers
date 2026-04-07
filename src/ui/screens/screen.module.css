@@ -49,6 +49,10 @@
 }
 
 .button:disabled {
+  cursor: not-allowed;
+}
+
+.button:disabled {
   color: #424242;
 }
 

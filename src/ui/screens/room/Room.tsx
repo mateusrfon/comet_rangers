@@ -1,13 +1,20 @@
 import { useState } from "react";
 import styles from "../screen.module.css";
+import type { RoomInfo } from "../../../network/protocol";
 
 type RoomProps = {
   startGame: () => void;
   leaveRoom: () => void;
-  roomId: string;
+  room: RoomInfo;
+  userId: string;
 };
 
-export const Room: React.FC<RoomProps> = ({ startGame, leaveRoom, roomId }) => {
+export const Room: React.FC<RoomProps> = ({
+  startGame,
+  leaveRoom,
+  room,
+  userId,
+}) => {
   const [copyState, setCopyState] = useState("none");
 
   function getCopyButton() {
@@ -25,12 +32,12 @@ export const Room: React.FC<RoomProps> = ({ startGame, leaveRoom, roomId }) => {
     <div className={styles.container}>
       <div className={styles.menuBox}>
         <div style={{ display: "flex" }}>
-          <h2 style={{ marginRight: "10px" }}>Room: {roomId}</h2>
+          <h2 style={{ marginRight: "10px" }}>Room: {room.id}</h2>
           <button
             className={styles.button}
             onClick={() =>
               navigator.clipboard
-                .writeText(roomId)
+                .writeText(room.id)
                 .then(() => {
                   setCopyState("copied");
                 })
@@ -43,8 +50,18 @@ export const Room: React.FC<RoomProps> = ({ startGame, leaveRoom, roomId }) => {
           </button>
         </div>
 
+        <ol>
+          {room.players.map((p) => (
+            <li>{p.name}</li>
+          ))}
+        </ol>
+
         <div className={styles.buttonGroup}>
-          <button className={styles.button} onClick={startGame}>
+          <button
+            className={styles.button}
+            onClick={startGame}
+            disabled={room.hostId !== userId}
+          >
             Start
           </button>
 
