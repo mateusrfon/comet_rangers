@@ -4,6 +4,7 @@ export interface InputState {
   left: boolean;
   right: boolean;
   shoot: boolean;
+  powerUp: boolean;
 }
 
 interface InputConfig {
@@ -12,9 +13,10 @@ interface InputConfig {
   left: string;
   right: string;
   shoot: string;
+  powerUp: string;
 }
 
-type Actions = "up" | "down" | "left" | "right" | "shoot";
+type Actions = "up" | "down" | "left" | "right" | "shoot" | "powerUp";
 
 interface PlayerInputState {
   [playerId: string]: InputState;
@@ -41,14 +43,16 @@ export class InputHandler {
   }
 
   public getState(playerId: string): InputState {
-    if (!this.inputStates[playerId])
+    if (!this.inputStates[playerId]) {
       return {
         up: false,
         down: false,
         left: false,
         right: false,
         shoot: false,
+        powerUp: false,
       };
+    }
     return { ...this.inputStates[playerId] };
   }
 
@@ -65,6 +69,7 @@ export class InputHandler {
       left: false,
       right: false,
       shoot: false,
+      powerUp: false,
     };
   }
 

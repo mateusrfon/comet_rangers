@@ -52,7 +52,7 @@ export const Room: React.FC<RoomProps> = ({
 
         <ol>
           {room.players.map((p) => (
-            <li>{p.name}</li>
+            <li key={p.id}>{p.name}</li>
           ))}
         </ol>
 

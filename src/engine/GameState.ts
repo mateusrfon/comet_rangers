@@ -1,6 +1,7 @@
 import { Asteroid } from "../entities/Asteroid";
 import { Bullet } from "../entities/Bullet";
 import { Player } from "../entities/Player";
+import { PowerUp } from "../entities/PowerUp";
 import type { GameStateDTO } from "../network/protocol";
 
 export class GameState {
@@ -8,6 +9,7 @@ export class GameState {
   players: Map<string, Player> = new Map();
   bullets: Bullet[] = [];
   asteroids: Asteroid[] = [];
+  powerUps: PowerUp[] = [];
   level: number = 0;
 
   applySnapshot(dto: GameStateDTO): void {
@@ -22,6 +24,7 @@ export class GameState {
           x: p.x,
           y: p.y,
           angle: p.angle,
+          shield: p.shield,
         });
         this.players.set(p.id, player);
         continue;
@@ -36,6 +39,10 @@ export class GameState {
 
     this.bullets = dto.bullets.map((b) => {
       return new Bullet({ ...b });
+    });
+
+    this.powerUps = dto.powerUps.map((p) => {
+      return new PowerUp({ ...p });
     });
   }
 }

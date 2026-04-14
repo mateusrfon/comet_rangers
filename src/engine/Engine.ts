@@ -38,10 +38,11 @@ export class Engine {
   async init() {
     this.inputHandler.addPlayer(this.gameClient.userId!, {
       up: "w",
-      down: "s",
+      down: "none",
       left: "a",
       right: "d",
       shoot: "shift",
+      powerUp: "s",
     });
     this.inputHandler.start();
   }

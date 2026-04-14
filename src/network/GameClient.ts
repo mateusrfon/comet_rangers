@@ -60,7 +60,6 @@ export class GameClient {
       const msg = decodeMessage(data);
 
       if (!msg || !msg.type) return;
-      console.log(msg);
 
       switch (msg?.type) {
         case "user_connected":
@@ -89,8 +88,6 @@ export class GameClient {
         case "game_state":
           this.onStateCallback?.(msg.data.state);
           break;
-        default:
-          console.log(msg);
       }
     };
 
@@ -161,5 +158,9 @@ export class GameClient {
     this.send({
       type: "leave_room",
     });
+  }
+
+  public disconnect() {
+    this.ws.close();
   }
 }

@@ -17,7 +17,6 @@ export default function Game() {
     players: [],
   });
 
-  // Initialize game client
   useEffect(() => {
     const client = new GameClient({
       onLeave: () => {
@@ -49,17 +48,10 @@ export default function Game() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setGameClient(client);
 
-    // return () => {
-    //   client.disconnect?.();
-    // };
+    return () => {
+      client.disconnect();
+    };
   }, []);
-
-  // Transform HMR updates into full reloads to reset game state
-  // if (import.meta.hot) {
-  //   import.meta.hot.accept(() => {
-  //     window.location.reload();
-  //   });
-  // }
 
   if (!isConnected || !gameClient?.userId) return <>Loading</>;
 

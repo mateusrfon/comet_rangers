@@ -25,17 +25,29 @@ export class Renderer {
     this.clear();
     for (const player of state.players.values()) {
       if (!player.isAlive) continue;
-      this.drawEntity(player);
+      this.drawEntity(player, "black");
+      if (player.shield.active) {
+        this.drawCircle(
+          player.x,
+          player.y,
+          player.shield.size,
+          "rgba(30, 30, 247, 0.23)",
+        );
+      }
     }
     for (const bullet of state.bullets) {
-      this.drawCircle(bullet.x, bullet.y, bullet.size); // no need for render positions since bullets are small and won't wrap visually
+      this.drawCircle(bullet.x, bullet.y, bullet.size, "black"); // no need for render positions since bullets are small and won't wrap visually
     }
     for (const asteroid of state.asteroids) {
-      this.drawEntity(asteroid);
+      this.drawEntity(asteroid, "black");
+    }
+    for (const powerUp of state.powerUps) {
+      this.drawEntity(powerUp, "rgba(0, 0, 255, 0.5)");
     }
   }
 
-  drawCircle(x: number, y: number, radius: number) {
+  drawCircle(x: number, y: number, radius: number, color: string) {
+    this.ctx.fillStyle = color;
     this.ctx.beginPath();
     this.ctx.arc(x, y, radius, 0, Math.PI * 2);
     this.ctx.fill();
@@ -64,15 +76,15 @@ export class Renderer {
     this.ctx.restore();
   }
 
-  drawEntity(entity: Entity) {
+  drawEntity(entity: Entity, color: string) {
     const positions = this.getRenderPositions(entity.x, entity.y, entity.size);
-    if (entity.type === "player") {
-      for (const pos of positions) {
+    for (const pos of positions) {
+      if (entity.type === "player") {
         this.drawTriangle(pos.x, pos.y, (entity as Player).angle, entity.size);
-      }
-    } else {
-      for (const pos of positions) {
-        this.drawCircle(pos.x, pos.y, entity.size);
+      } else if (entity.type === "powerUp-shield") {
+        this.drawCircle(pos.x, pos.y, entity.size, color);
+      } else {
+        this.drawCircle(pos.x, pos.y, entity.size, color);
       }
     }
   }
